@@ -1,10 +1,12 @@
 import tkinter
 import customtkinter
 
-app = tkinter.Tk()
-app.geometry("500x500")
-customtkinter.set_appearance_mode("dark")  # Modes: system (default), light, dark
-customtkinter.set_default_color_theme("dark-blue")
+
+class Interface(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("500x500")
+        self.title("My Balance")
 
 
-app.mainloop()
+
