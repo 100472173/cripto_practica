@@ -1,4 +1,5 @@
 from interface import Interface
+from register_interface import Register_interface
 import customtkinter
 
 
@@ -29,6 +30,3 @@ class Login_interface(Interface):
                                                     width=200, height=30, fg_color="#5dade2")
         self.new_user_button.pack(padx=10, pady=30)
         self.new_user_button.place(relx=0.16, rely=0.625)
-
-app = Login_interface()
-app.mainloop()
