@@ -1,4 +1,5 @@
 import sqlite3
+#a mamar
 conn = sqlite3.connect('app_database.db')
 def insert_new_user(username,pwd):
     cursor = conn.cursor()
