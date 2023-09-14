@@ -13,7 +13,7 @@ def check_username_syntax(username: str):
     if not result:
         print("Wrong pattern")
     else:
-        print("OK.")
+        print("OK")
 
 
 def check_pwd_syntax(pwd: str):

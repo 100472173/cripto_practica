@@ -10,4 +10,4 @@ validation_pattern = r"^(?=.*[A-Z])(?=.*\d)(?=.*[~@_/:+]).{8,}$"
 myreg = re.compile(validation_pattern)
 print(myreg.fullmatch("Alo123!!"))
 db_management.insert_new_user("Juan","lelele")
-user_auth.check_pwd_syntax("lllAolo12!")
+user_auth.check_pwd_syntax("lllAuolo12!")
