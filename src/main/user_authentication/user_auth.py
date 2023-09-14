@@ -1,5 +1,6 @@
-from database_management import db_management
 import re
+
+
 def check_username_syntax(username: str):
     """ Comprueba que el nombre de usuario sigue el patrón definido como correcto
         El patrón sigue estas reglas:
@@ -12,15 +13,14 @@ def check_username_syntax(username: str):
     if not result:
         print("Wrong pattern")
     else:
-        print("OK.")
+        print("OK")
+
 
 def check_pwd_syntax(pwd: str):
-    """Comprueba que la contraseña sigue el patrón definido como correcto
-           El patrón sigue estas reglas:
-              - Al menos una mayúscula
-              - Al menos un número
-              - Al menos un caracter especial (~@_/+:)
-              - Longitud de al menos 8 caracteres"""
-
-
-
+    validation_pattern = r"^(?=.*[A-Z])(?=.*\d)(?=.*[!~@_/:+]).{8,}$"
+    my_regex = re.compile(validation_pattern)
+    result = my_regex.fullmatch(pwd)
+    if not result:
+        print("Wrong pattern")
+    else:
+        print("OK.")
