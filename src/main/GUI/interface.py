@@ -1,4 +1,3 @@
-import tkinter
 import customtkinter
 
 
@@ -7,13 +6,26 @@ class Interface(customtkinter.CTk):
         super().__init__()
         self.geometry("500x500")
         self.title("My Balance")
-        self.frame = Login_frame(master=self, height=500, width=500)
-        self.frame.pack(padx=40, pady=20, fill="both", expand="true")
+        self.frames = {}
+        for F in (Login_frame, Register_frame, Main_frame):
+            page_name = F.__name__
+            frame = F(master=self, controller=self)
+            self.frames[page_name] = frame
+            frame.pack(padx=40, pady=20, fill="both", expand="true")
+        self.show_frame("Login_frame")
+
+    def show_frame(self, page_name):
+        for name in self.frames:
+            if name != page_name:
+                self.frames[name].pack_forget()
+        frame = self.frames[page_name]
+        frame.pack(padx=40, pady=20, fill="both", expand="true")
 
 
 class Login_frame(customtkinter.CTkFrame):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, controller):
+        super().__init__(master)
+        self.controller = controller
         self.titulo = customtkinter.CTkLabel(master=self,
                                              text="Inicio de sesión",
                                              text_color="black",
@@ -28,20 +40,22 @@ class Login_frame(customtkinter.CTkFrame):
         self.pwd.pack(padx=10, pady=30)
         self.pwd.place(relx=0.275, rely=0.375)
         self.login_button = customtkinter.CTkButton(master=self, text="Iniciar sesión", font=("Roboto", 15),
-                                                    width=190, height=37)
+                                                    width=190, height=37, command=lambda: controller.show_frame("Main_frame"))
         self.login_button.pack(padx=10, pady=30)
         self.login_button.place(relx=0.275, rely=0.5)
         self.new_user_button = customtkinter.CTkButton(master=self,
                                                        text="¿Eres un nuevo usuario? Registráte aquí",
                                                        font=("Roboto", 15),
-                                                       width=200, height=30, fg_color="#5dade2")
+                                                       width=200, height=30, fg_color="#5dade2",
+                                                       command=lambda: controller.show_frame("Register_frame"))
         self.new_user_button.pack(padx=10, pady=30)
         self.new_user_button.place(relx=0.16, rely=0.625)
 
 
 class Register_frame(customtkinter.CTkFrame):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, controller):
+        super().__init__(master)
+        self.controller = controller
         self.titulo = customtkinter.CTkLabel(master=self,
                                              text="Registro de usuario",
                                              text_color="black",
@@ -79,14 +93,16 @@ class Register_frame(customtkinter.CTkFrame):
         self.dinero.place(relx=0.275, rely=0.7)
         self.register_button = customtkinter.CTkButton(master=self, text="Registrar usuario",
                                                        font=("Roboto", 15),
-                                                       width=225, height=37)
+                                                       width=225, height=37,
+                                                       command=lambda: controller.show_frame("Login_frame"))
         self.register_button.pack(padx=10, pady=30)
         self.register_button.place(relx=0.225, rely=0.825)
 
 
 class Main_frame(customtkinter.CTkFrame):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
+    def __init__(self, master, controller):
+        super().__init__(master)
+        self.controller = controller
         self.check_dinero = customtkinter.CTkButton(master=self, text="Ver dinero", font=("Roboto", 25),
                                                     width=250, height=60)
         self.check_dinero.pack(padx=10, pady=30)
@@ -100,13 +116,11 @@ class Main_frame(customtkinter.CTkFrame):
         self.pago.pack(padx=10, pady=30)
         self.pago.place(relx=0.21, rely=0.45)
         self.salir = customtkinter.CTkButton(master=self, text="Cerrar sesión", font=("Roboto", 25),
-                                             width=250, height=60, fg_color="#e74c3c", hover_color="#b03a2e")
+                                             width=250, height=60, fg_color="#e74c3c", hover_color="#b03a2e",
+                                             command=lambda: controller.destroy())
         self.salir.pack(padx=10, pady=30)
         self.salir.place(relx=0.21, rely=0.65)
 
 
 app = Interface()
-app.frame.pack_forget()
-app.frame = Register_frame(master=app, height=500, width=500)
-app.frame.pack(padx=40, pady=20, fill="both", expand="true")
 app.mainloop()
