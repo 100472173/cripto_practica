@@ -1,4 +1,5 @@
 import customtkinter
+from database_management import db_management
 
 
 class Interface(customtkinter.CTk):
@@ -40,7 +41,8 @@ class Login_frame(customtkinter.CTkFrame):
         self.pwd.pack(padx=10, pady=30)
         self.pwd.place(relx=0.275, rely=0.375)
         self.login_button = customtkinter.CTkButton(master=self, text="Iniciar sesión", font=("Roboto", 15),
-                                                    width=190, height=37, command=lambda: controller.show_frame("Main_frame"))
+                                                    width=190, height=37,
+                                                    command=lambda: controller.show_frame("Main_frame"))
         self.login_button.pack(padx=10, pady=30)
         self.login_button.place(relx=0.275, rely=0.5)
         self.new_user_button = customtkinter.CTkButton(master=self,
@@ -76,7 +78,7 @@ class Register_frame(customtkinter.CTkFrame):
                                              width=190, height=37)
         self.nombre.pack(padx=10, pady=30)
         self.nombre.place(relx=0.275, rely=0.4)
-        self.apellido = customtkinter.CTkEntry(master=self, placeholder_text="Apellidos",
+        self.apellido = customtkinter.CTkEntry(master=self, placeholder_text="Apellido",
                                                font=("Roboto", 15),
                                                width=190, height=37)
         self.apellido.pack(padx=10, pady=30)
@@ -94,7 +96,10 @@ class Register_frame(customtkinter.CTkFrame):
         self.register_button = customtkinter.CTkButton(master=self, text="Registrar usuario",
                                                        font=("Roboto", 15),
                                                        width=225, height=37,
-                                                       command=lambda: controller.show_frame("Login_frame"))
+                                                       command=lambda: register_user_gui(self.controller, self.usuario.get(),
+                                                                                 self.pwd.get(), self.nombre.get(),
+                                                                                 self.apellido.get(), "", self.email.get(),
+                                                                                 self.dinero.get()))
         self.register_button.pack(padx=10, pady=30)
         self.register_button.place(relx=0.225, rely=0.825)
 
@@ -122,5 +127,8 @@ class Main_frame(customtkinter.CTkFrame):
         self.salir.place(relx=0.21, rely=0.65)
 
 
-app = Interface()
-app.mainloop()
+def register_user_gui(controller, user, pwd, name, surname1, surname2, email, money):
+    if not db_management.search_user(user):
+        db_management.insert_new_user(user, pwd)
+        db_management.insert_new_user_details(user, money, email, name, surname1, surname2)
+        controller.show_frame("Login_frame")
