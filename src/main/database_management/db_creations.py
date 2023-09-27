@@ -15,5 +15,5 @@ def create():
                         SURNAME1 VARCHAR(50),
                         SURNAME2 VARCHAR(50),
                         PRIMARY KEY(USER),
-                        FOREIGN KEY(USER) references USUARIOS(NICKNAME)
-                    );""") #xd
+                        FOREIGN KEY(USER) references USUARIOS(NICKNAME) ON DELETE CASCADE
+                    );""")

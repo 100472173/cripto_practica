@@ -132,3 +132,5 @@ def register_user_gui(controller, user, pwd, name, surname1, surname2, email, mo
         db_management.insert_new_user(user, pwd)
         db_management.insert_new_user_details(user, money, email, name, surname1, surname2)
         controller.show_frame("Login_frame")
+    else:
+        print("Usuario ya existente")
