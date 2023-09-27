@@ -24,3 +24,20 @@ def check_pwd_syntax(pwd: str):
         print("Wrong pattern")
     else:
         print("OK.")
+
+"""
+mirar en cryptography.io
+Hay que guardar en la tabla usuarios el usuario, la contraseña en forma de token y el salt
+
+
+hay que a parte de derivar la password en un token, verificarla
+def generate_pwd_token(pwd: str):
+    salt = os.urandom(16)
+    kdf = Scrypt (
+        salt = salt,
+        length = 32,
+        n =2**14,
+        r=8,
+        p=1)        
+    pwd_token = kdf.derive(b(pwd))
+    return pwd_token"""

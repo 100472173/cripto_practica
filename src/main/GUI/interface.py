@@ -1,4 +1,7 @@
+from tkinter import END
+
 import customtkinter
+import tkinter
 from database_management import db_management
 
 
@@ -13,11 +16,15 @@ class Interface(customtkinter.CTk):
             frame = F(master=self, controller=self)
             self.frames[page_name] = frame
             frame.pack(padx=40, pady=20, fill="both", expand="true")
+        self.current_user = ""
         self.show_frame("Login_frame")
 
     def show_frame(self, page_name):
         for name in self.frames:
             if name != page_name:
+                """if name == "Register_frame":
+                    for entry in self.frames[name].entries:
+                        entry.delete(0, END)"""
                 self.frames[name].pack_forget()
         frame = self.frames[page_name]
         frame.pack(padx=40, pady=20, fill="both", expand="true")
@@ -42,7 +49,8 @@ class Login_frame(customtkinter.CTkFrame):
         self.pwd.place(relx=0.275, rely=0.375)
         self.login_button = customtkinter.CTkButton(master=self, text="Iniciar sesión", font=("Roboto", 15),
                                                     width=190, height=37,
-                                                    command=lambda: controller.show_frame("Main_frame"))
+                                                    command=lambda: login_user_gui(self.controller, self.usuario.get(),
+                                                                                   self.pwd.get()))
         self.login_button.pack(padx=10, pady=30)
         self.login_button.place(relx=0.275, rely=0.5)
         self.new_user_button = customtkinter.CTkButton(master=self,
@@ -96,12 +104,16 @@ class Register_frame(customtkinter.CTkFrame):
         self.register_button = customtkinter.CTkButton(master=self, text="Registrar usuario",
                                                        font=("Roboto", 15),
                                                        width=225, height=37,
-                                                       command=lambda: register_user_gui(self.controller, self.usuario.get(),
-                                                                                 self.pwd.get(), self.nombre.get(),
-                                                                                 self.apellido.get(), "", self.email.get(),
-                                                                                 self.dinero.get()))
+                                                       command=lambda: register_user_gui(self.controller,
+                                                                                         self.usuario.get(),
+                                                                                         self.pwd.get(),
+                                                                                         self.nombre.get(),
+                                                                                         self.apellido.get(), "",
+                                                                                         self.email.get(),
+                                                                                         self.dinero.get()))
         self.register_button.pack(padx=10, pady=30)
         self.register_button.place(relx=0.225, rely=0.825)
+        self.entries = [self.usuario, self.pwd, self.nombre, self.apellido, self.email, self.dinero]
 
 
 class Main_frame(customtkinter.CTkFrame):
@@ -125,6 +137,11 @@ class Main_frame(customtkinter.CTkFrame):
                                              command=lambda: controller.destroy())
         self.salir.pack(padx=10, pady=30)
         self.salir.place(relx=0.21, rely=0.65)
+        self.borrar_user = customtkinter.CTkButton(master=self, text="Borrar usuario", font=("Roboto", 25),
+                                                   width=250, height=60, fg_color="black", hover_color="#202121",
+                                                   command=lambda: controller.destroy())
+        self.borrar_user.pack(padx=10, pady=30)
+        self.borrar_user.place(relx=0.21, rely=0.80)
 
 
 def register_user_gui(controller, user, pwd, name, surname1, surname2, email, money):
@@ -132,5 +149,13 @@ def register_user_gui(controller, user, pwd, name, surname1, surname2, email, mo
         db_management.insert_new_user(user, pwd)
         db_management.insert_new_user_details(user, money, email, name, surname1, surname2)
         controller.show_frame("Login_frame")
-    else:
-        print("Usuario ya existente")
+
+
+def login_user_gui(controller, user, pwd):
+    if db_management.search_user(user):
+        controller.show_frame("Main_frame")
+        controller.current_user = user
+
+def borrar_usuario(controller):
+    db_management.delete_user(controller.current_user)
+

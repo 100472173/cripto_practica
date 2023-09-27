@@ -5,6 +5,7 @@ conn = sqlite3.connect('app_database.db')
 
 
 def insert_new_user(username, pwd):
+    """falta generar el token y el salt"""
     cursor = conn.cursor()
     sql_query = f"INSERT INTO usuarios(nickname,password) values ('{username}','{pwd}');"
     cursor.execute(sql_query)
