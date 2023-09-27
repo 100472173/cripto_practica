@@ -36,6 +36,7 @@ def delete_user(username: str):
     if search_user(username):
         sql_statement = f"DELETE FROM usuarios WHERE nickname = '{username}';"
         cursor.execute(sql_statement)
+        commit_changes()
     else:
         print("Usuario no esta registrado en la base de datos")
 
