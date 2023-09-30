@@ -1,8 +1,8 @@
-from tkinter import END
-
 import customtkinter
-import tkinter
 from database_management import db_management
+import cryptography
+
+current_user = ""
 
 
 class Interface(customtkinter.CTk):
@@ -11,12 +11,11 @@ class Interface(customtkinter.CTk):
         self.geometry("500x500")
         self.title("My Balance")
         self.frames = {}
-        for F in (Login_frame, Register_frame, Main_frame):
+        for F in (Login_frame, Register_frame, Main_frame, Register_frame_ar, Login_frame_error):
             page_name = F.__name__
             frame = F(master=self, controller=self)
             self.frames[page_name] = frame
             frame.pack(padx=40, pady=20, fill="both", expand="true")
-        self.current_user = ""
         self.show_frame("Login_frame")
 
     def show_frame(self, page_name):
@@ -52,14 +51,25 @@ class Login_frame(customtkinter.CTkFrame):
                                                     command=lambda: login_user_gui(self.controller, self.usuario.get(),
                                                                                    self.pwd.get()))
         self.login_button.pack(padx=10, pady=30)
-        self.login_button.place(relx=0.275, rely=0.5)
+        self.login_button.place(relx=0.275, rely=0.55)
         self.new_user_button = customtkinter.CTkButton(master=self,
                                                        text="¿Eres un nuevo usuario? Registráte aquí",
                                                        font=("Roboto", 15),
                                                        width=200, height=30, fg_color="#5dade2",
                                                        command=lambda: controller.show_frame("Register_frame"))
         self.new_user_button.pack(padx=10, pady=30)
-        self.new_user_button.place(relx=0.16, rely=0.625)
+        self.new_user_button.place(relx=0.16, rely=0.675)
+
+
+class Login_frame_error(Login_frame):
+    def __init__(self, master, controller):
+        super().__init__(master, controller)
+        self.error = customtkinter.CTkLabel(master=self,
+                                            text="Usuario o contraseña incorrecto",
+                                            text_color="red",
+                                            font=("Century Gothic", 15))
+        self.error.pack(padx=10, pady=30)
+        self.error.place(relx=0.225, rely=0.475)
 
 
 class Register_frame(customtkinter.CTkFrame):
@@ -112,8 +122,19 @@ class Register_frame(customtkinter.CTkFrame):
                                                                                          self.email.get(),
                                                                                          self.dinero.get()))
         self.register_button.pack(padx=10, pady=30)
-        self.register_button.place(relx=0.225, rely=0.825)
+        self.register_button.place(relx=0.225, rely=0.875)
         self.entries = [self.usuario, self.pwd, self.nombre, self.apellido, self.email, self.dinero]
+
+
+class Register_frame_ar(Register_frame):
+    def __init__(self, master, controller):
+        super().__init__(master, controller)
+        self.already_registered = customtkinter.CTkLabel(master=self,
+                                                         text="Usuario ya registrado",
+                                                         text_color="red",
+                                                         font=("Century Gothic", 15))
+        self.already_registered.pack(padx=10, pady=30)
+        self.already_registered.place(relx=0.32, rely=0.8)
 
 
 class Main_frame(customtkinter.CTkFrame):
@@ -139,7 +160,7 @@ class Main_frame(customtkinter.CTkFrame):
         self.salir.place(relx=0.21, rely=0.65)
         self.borrar_user = customtkinter.CTkButton(master=self, text="Borrar usuario", font=("Roboto", 25),
                                                    width=250, height=60, fg_color="black", hover_color="#202121",
-                                                   command=lambda: controller.destroy())
+                                                   command=lambda: borrar_usuario(self.controller))
         self.borrar_user.pack(padx=10, pady=30)
         self.borrar_user.place(relx=0.21, rely=0.80)
 
@@ -149,13 +170,23 @@ def register_user_gui(controller, user, pwd, name, surname1, surname2, email, mo
         db_management.insert_new_user(user, pwd)
         db_management.insert_new_user_details(user, money, email, name, surname1, surname2)
         controller.show_frame("Login_frame")
+    else:
+        controller.show_frame("Register_frame_ar")
 
 
 def login_user_gui(controller, user, pwd):
     if db_management.search_user(user):
-        controller.show_frame("Main_frame")
-        controller.current_user = user
+        try:
+            db_management.verify_user_password(user, pwd)
+            global current_user
+            current_user = user
+            controller.show_frame("Main_frame")
+        except cryptography.exceptions.InvalidKey:
+            controller.show_frame("Login_frame_error")
+
 
 def borrar_usuario(controller):
-    db_management.delete_user(controller.current_user)
-
+    global current_user
+    db_management.delete_user(current_user)
+    print(current_user)
+    controller.destroy()
