@@ -3,7 +3,7 @@ import os
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 # a mamar
-conn = sqlite3.connect('app_database.db')
+conn = sqlite3.connect('../database_management/app_database.db')
 
 
 def generate_token(pwd):
@@ -36,14 +36,19 @@ def verify_user_password(username, pwd):
         r=8,
         p=1,
     )
-    kdf.verify(bytes(pwd, 'UTF-8'), pwd_token)
+    kdf.verify(bytes(pwd, 'ASCII'), pwd_token)
 
 
 def insert_new_user(username, pwd):
     cursor = conn.cursor()
     token, salt = generate_token(pwd)
-    sql_query = f"INSERT INTO usuarios(nickname,pwd_token,salt) values ('{username}','{token}', '{salt}');"
-    cursor.execute(sql_query)
+    print(token)
+    token_char = str(token)
+    salt_char = str(salt)
+    print(type(token_char))
+    sql_query = f"INSERT INTO usuarios(nickname,pwd_token,salt) values (?,?,?);"
+    valores_insert = [username,token_char,salt_char]
+    cursor.execute(sql_query,valores_insert)
     commit_changes()
 
 
