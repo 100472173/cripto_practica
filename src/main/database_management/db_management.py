@@ -24,7 +24,8 @@ def get_token_salt(username):
     sql_query = f"SELECT pwd_token, salt FROM usuarios WHERE nickname = '{username}';"
     cursor.execute(sql_query)
     info = cursor.fetchall()
-    return info[0], info[1]
+    print(info)
+    return (info[0][0]), (info[0][1])
 
 
 def verify_user_password(username, pwd):
@@ -42,12 +43,8 @@ def verify_user_password(username, pwd):
 def insert_new_user(username, pwd):
     cursor = conn.cursor()
     token, salt = generate_token(pwd)
-    print(token)
-    token_char = str(token)
-    salt_char = str(salt)
-    print(type(token_char))
     sql_query = f"INSERT INTO usuarios(nickname,pwd_token,salt) values (?,?,?);"
-    valores_insert = [username,token_char,salt_char]
+    valores_insert = [username,token,salt]
     cursor.execute(sql_query,valores_insert)
     commit_changes()
 
