@@ -1,12 +1,8 @@
 # cosas_que_hacer_en_la_app
 
-1. Al cerrar sesion, volver al frame de inicio
 2. Frame de mostrar datos
 3. Implementar ingreso/transferencia
 4. Comprobar la sintaxis de registro
-5. Cuando registres un usuario, al volver a esa pantalla se limpien los campos
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-6. Con todo, ya nos ponemos a cifrar
 
 
 

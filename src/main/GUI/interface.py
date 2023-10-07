@@ -1,3 +1,5 @@
+from tkinter import END
+
 import customtkinter
 from database_management import db_management
 import cryptography
@@ -10,23 +12,22 @@ class Interface(customtkinter.CTk):
         super().__init__()
         self.geometry("500x500")
         self.title("My Balance")
-        self.frames = {}
-        for F in (Login_frame, Register_frame, Main_frame, Register_frame_ar, Login_frame_error):
-            page_name = F.__name__
-            frame = F(master=self, controller=self)
-            self.frames[page_name] = frame
-            frame.pack(padx=40, pady=20, fill="both", expand="true")
-        self.show_frame("Login_frame")
+        self.frame = Login_frame(master=self, controller=self)
+        self.frame.pack(padx=40, pady=20, fill="both", expand="true")
 
     def show_frame(self, page_name):
-        for name in self.frames:
-            if name != page_name:
-                """if name == "Register_frame":
-                    for entry in self.frames[name].entries:
-                        entry.delete(0, END)"""
-                self.frames[name].pack_forget()
-        frame = self.frames[page_name]
-        frame.pack(padx=40, pady=20, fill="both", expand="true")
+        self.frame.destroy()
+        if page_name == "Login_frame":
+            self.frame = Login_frame(master=self, controller=self)
+        elif page_name == "Login_frame_error":
+            self.frame = Login_frame_error(master=self, controller=self)
+        elif page_name == "Register_frame":
+            self.frame = Register_frame(master=self, controller=self)
+        elif page_name == "Register_frame_ar":
+            self.frame = Register_frame_ar(master=self, controller=self)
+        else:
+            self.frame = Main_frame(master=self, controller=self)
+        self.frame.pack(padx=40, pady=20, fill="both", expand="true")
 
 
 class Login_frame(customtkinter.CTkFrame):
@@ -155,7 +156,7 @@ class Main_frame(customtkinter.CTkFrame):
         self.pago.place(relx=0.21, rely=0.45)
         self.salir = customtkinter.CTkButton(master=self, text="Cerrar sesión", font=("Roboto", 25),
                                              width=250, height=60, fg_color="#e74c3c", hover_color="#b03a2e",
-                                             command=lambda: controller.destroy())
+                                             command=lambda: controller.show_frame("Login_frame"))
         self.salir.pack(padx=10, pady=30)
         self.salir.place(relx=0.21, rely=0.65)
         self.borrar_user = customtkinter.CTkButton(master=self, text="Borrar usuario", font=("Roboto", 25),
