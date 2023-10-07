@@ -183,6 +183,8 @@ def login_user_gui(controller, user, pwd):
             controller.show_frame("Main_frame")
         except cryptography.exceptions.InvalidKey:
             controller.show_frame("Login_frame_error")
+    else:
+        controller.show_frame("Login_frame_error")
 
 
 def borrar_usuario(controller):

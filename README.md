@@ -5,7 +5,7 @@
 3. Implementar ingreso/transferencia
 4. Comprobar la sintaxis de registro
 5. Cuando registres un usuario, al volver a esa pantalla se limpien los campos
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 6. Con todo, ya nos ponemos a cifrar
 
 
