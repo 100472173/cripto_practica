@@ -1,8 +1,8 @@
 # cosas_que_hacer_en_la_app
 
-2. Frame de mostrar datos
-3. Implementar ingreso/transferencia
-4. Comprobar la sintaxis de registro
+1. Frame de mostrar datos
+2. Comprobar la sintaxis de registro
+3. Casos de errores
 
 
 
