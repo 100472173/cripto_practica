@@ -196,7 +196,7 @@ class Withdraw_money_frame(customtkinter.CTkFrame):
         self.entrada.place(relx=0.28, rely=0.32)
         self.confirmar = customtkinter.CTkButton(master=self, text="Confirmar", font=("Roboto", 25),
                                                  width=250, height=50, fg_color="#0dba2d", hover_color="#09731d",
-                                                 command=lambda: pagar_dinero(self.controller, self.entrada.get()))
+                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),"retirada"))
         self.confirmar.pack(padx=10, pady=30)
         self.confirmar.place(relx=0.21, rely=0.50)
         self.volver = customtkinter.CTkButton(master=self, text="Volver", font=("Roboto", 15),
@@ -223,7 +223,7 @@ class Sum_money_frame(customtkinter.CTkFrame):
         self.entrada.place(relx=0.28, rely=0.32)
         self.confirmar = customtkinter.CTkButton(master=self, text="Confirmar", font=("Roboto", 25),
                                                  width=250, height=50, fg_color="#0dba2d", hover_color="#09731d",
-                                                 command=lambda: ingresar_dinero(self.controller, self.entrada.get()))
+                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),"ingreso"))
         self.confirmar.pack(padx=10, pady=30)
         self.confirmar.place(relx=0.21, rely=0.50)
         self.volver = customtkinter.CTkButton(master=self, text="Volver", font=("Roboto", 15),
@@ -262,11 +262,9 @@ def borrar_usuario(controller):
     controller.destroy()
 
 
-def pagar_dinero(controller, cantidad):
+def modificar_dinero(controller,cantidad,operation_type):
+    global current_user
+    db_management.modify_money(current_user,cantidad,operation_type)
     # Buscar al usuario en user_info usando el current_user y actualizar su dinero restandole cantidad
     controller.show_frame("Main_frame")
 
-
-def ingresar_dinero(controller, cantidad):
-    # Buscar al usuario en user_info usando el current_user y actualizar su dinero sumandole cantidad
-    controller.show_frame("Main_frame")

@@ -24,7 +24,6 @@ def get_token_salt(username):
     sql_query = f"SELECT pwd_token, salt FROM usuarios WHERE nickname = '{username}';"
     cursor.execute(sql_query)
     info = cursor.fetchall()
-    print(info)
     return (info[0][0]), (info[0][1])
 
 
@@ -49,7 +48,7 @@ def insert_new_user(username, pwd):
     commit_changes()
 
 
-def insert_new_user_details(username, money, email, name, surname1, surname2):
+def insert_new_user_details(username: str, money: float, email: str, name: str, surname1: str, surname2: str)->None:
     cursor = conn.cursor()
     sql_query = f"INSERT INTO user_info(user, money, email, name, surname1, surname2) values ('{username}','{money}', " \
                 f"'{email}','{name}','{surname1}','{surname2}');"
@@ -95,8 +94,16 @@ def query():
     print(info)
 
 
-def modify_money(username, new_money):
+def modify_money(username, new_money,operation_type):
     cursor = conn.cursor()
-    money = str(new_money)
-    sql_statement = f"UPDATE user_info SET money = {money} WHERE nickname = '{username}';"
+    sql_query = f"SELECT money from user_info where user = '{username}';"
+    cursor.execute(sql_query)
+    info = cursor.fetchall()
+    current_money = info[0][0]
+    if operation_type == "ingreso":
+        money = current_money + int(new_money)
+    elif operation_type == "retirada":
+        money = current_money - int(new_money)
+    sql_statement = f"UPDATE user_info SET money = {money} WHERE user = '{username}';"
+    cursor.execute(sql_statement)
     commit_changes()

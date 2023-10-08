@@ -7,3 +7,7 @@ cursor.execute(sql_query)
 info = cursor.fetchall()
 for row in info:
     print(row)
+sql_query = f"SELECT money from user_info where user = 'iboPSOE';"
+cursor.execute(sql_query)
+info = cursor.fetchall()
+print(type(info[0][0]))
