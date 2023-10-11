@@ -17,7 +17,6 @@ def create():
                         EMAIL VARCHAR(50),
                         NAME VARCHAR(30),
                         SURNAME1 VARCHAR(50),
-                        SURNAME2 VARCHAR(50),
                         PRIMARY KEY(USER),
                         FOREIGN KEY(USER) references USUARIOS(NICKNAME) ON DELETE CASCADE
                     );""")

@@ -3,8 +3,9 @@ from tkinter import END
 import customtkinter
 from database_management import db_management
 import cryptography
+from user_authentication import user_auth
 
-current_user = ""
+current_user = "a"
 
 
 class Interface(customtkinter.CTk):
@@ -25,10 +26,17 @@ class Interface(customtkinter.CTk):
             self.frame = Register_frame(master=self, controller=self)
         elif page_name == "Register_frame_ar":
             self.frame = Register_frame_ar(master=self, controller=self)
+        elif page_name == "Register_frame_wrong":
+            self.frame = Register_frame_wrong(master=self, controller=self)
         elif page_name == "Withdraw_money_frame":
             self.frame = Withdraw_money_frame(master=self, controller=self)
         elif page_name == "Sum_money_frame":
             self.frame = Sum_money_frame(master=self, controller=self)
+        elif page_name == "Show_data_frame":
+            global current_user
+            money, email, name, surname = db_management.get_user_info(current_user)
+            self.frame = Show_data_frame(master=self, controller=self, user=current_user, email=email, name=name,
+                                         surname=surname, money=money)
         else:
             self.frame = Main_frame(master=self, controller=self)
         self.frame.pack(padx=40, pady=20, fill="both", expand="true")
@@ -120,22 +128,25 @@ class Register_frame(customtkinter.CTkFrame):
         self.dinero.place(relx=0.275, rely=0.65)
         self.register_button = customtkinter.CTkButton(master=self, text="Registrar usuario",
                                                        font=("Roboto", 15),
-                                                       width=225, height=37,
+                                                       width=190, height=37,
                                                        command=lambda: register_user_gui(self.controller,
                                                                                          self.usuario.get(),
                                                                                          self.pwd.get(),
                                                                                          self.nombre.get(),
-                                                                                         self.apellido.get(), "",
+                                                                                         self.apellido.get(),
                                                                                          self.email.get(),
                                                                                          self.dinero.get()))
         self.register_button.pack(padx=10, pady=30)
-        self.register_button.place(relx=0.225, rely=0.80)
+        self.register_button.place(relx=0.275, rely=0.80)
         self.volver = customtkinter.CTkButton(master=self, text="Volver", font=("Roboto", 15),
                                               width=100, height=20,
                                               command=lambda: controller.show_frame("Login_frame"))
         self.volver.pack(padx=10, pady=30)
         self.volver.place(relx=0.05, rely=0.92)
-        self.entries = [self.usuario, self.pwd, self.nombre, self.apellido, self.email, self.dinero]
+        self.reglas = customtkinter.CTkButton(master=self, text="Reglas", font=("Roboto", 15),
+                                              width=100, height=20)
+        self.reglas.pack(padx=10, pady=30)
+        self.reglas.place(relx=0.725, rely=0.92)
 
 
 class Register_frame_ar(Register_frame):
@@ -149,12 +160,24 @@ class Register_frame_ar(Register_frame):
         self.already_registered.place(relx=0.32, rely=0.73)
 
 
+class Register_frame_wrong(Register_frame):
+    def __init__(self, master, controller):
+        super().__init__(master, controller)
+        self.wrong = customtkinter.CTkLabel(master=self,
+                                                         text="Formato de los datos incorrecto",
+                                                         text_color="red",
+                                                         font=("Century Gothic", 15))
+        self.wrong.pack(padx=0, pady=0)
+        self.wrong.place(relx=0.225, rely=0.73)
+
+
 class Main_frame(customtkinter.CTkFrame):
     def __init__(self, master, controller):
         super().__init__(master)
         self.controller = controller
         self.check_dinero = customtkinter.CTkButton(master=self, text="Ver dinero", font=("Roboto", 25),
-                                                    width=250, height=60)
+                                                    width=250, height=60,
+                                                    command=lambda: controller.show_frame("Show_data_frame"))
         self.check_dinero.pack(padx=10, pady=30)
         self.check_dinero.place(relx=0.21, rely=0.15)
         self.ingreso = customtkinter.CTkButton(master=self, text="Anotar ingreso", font=("Roboto", 25),
@@ -196,7 +219,8 @@ class Withdraw_money_frame(customtkinter.CTkFrame):
         self.entrada.place(relx=0.28, rely=0.32)
         self.confirmar = customtkinter.CTkButton(master=self, text="Confirmar", font=("Roboto", 25),
                                                  width=250, height=50, fg_color="#0dba2d", hover_color="#09731d",
-                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),"retirada"))
+                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),
+                                                                                  "retirada"))
         self.confirmar.pack(padx=10, pady=30)
         self.confirmar.place(relx=0.21, rely=0.50)
         self.volver = customtkinter.CTkButton(master=self, text="Volver", font=("Roboto", 15),
@@ -223,7 +247,8 @@ class Sum_money_frame(customtkinter.CTkFrame):
         self.entrada.place(relx=0.28, rely=0.32)
         self.confirmar = customtkinter.CTkButton(master=self, text="Confirmar", font=("Roboto", 25),
                                                  width=250, height=50, fg_color="#0dba2d", hover_color="#09731d",
-                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),"ingreso"))
+                                                 command=lambda: modificar_dinero(self.controller, self.entrada.get(),
+                                                                                  "ingreso"))
         self.confirmar.pack(padx=10, pady=30)
         self.confirmar.place(relx=0.21, rely=0.50)
         self.volver = customtkinter.CTkButton(master=self, text="Volver", font=("Roboto", 15),
@@ -233,11 +258,88 @@ class Sum_money_frame(customtkinter.CTkFrame):
         self.volver.place(relx=0.05, rely=0.90)
 
 
-def register_user_gui(controller, user, pwd, name, surname1, surname2, email, money):
+class Show_data_frame(customtkinter.CTkFrame):
+    def __init__(self, master, controller, user, email, name, surname, money):
+        super().__init__(master)
+        self.controller = controller
+        self.user_titulo = customtkinter.CTkLabel(master=self,
+                                                  text="Usuario:",
+                                                  text_color="black",
+                                                  font=("Century Gothic", 20))
+        self.user_titulo.pack(padx=10, pady=30)
+        self.user_titulo.place(relx=0.15, rely=0.20)
+        self.user = customtkinter.CTkLabel(master=self,
+                                           text=user,
+                                           text_color="black",
+                                           font=("Century Gothic", 20))
+        self.user.pack(padx=10, pady=30)
+        self.user.place(relx=0.35, rely=0.20)
+        self.email_titulo = customtkinter.CTkLabel(master=self,
+                                                   text="E-mail:",
+                                                   text_color="black",
+                                                   font=("Century Gothic", 20))
+        self.email_titulo.pack(padx=10, pady=30)
+        self.email_titulo.place(relx=0.15, rely=0.275)
+        self.email = customtkinter.CTkLabel(master=self,
+                                            text=email,
+                                            text_color="black",
+                                            font=("Century Gothic", 20))
+        self.email.pack(padx=10, pady=30)
+        self.email.place(relx=0.325, rely=0.275)
+        self.name_titulo = customtkinter.CTkLabel(master=self,
+                                                  text="Nombre:",
+                                                  text_color="black",
+                                                  font=("Century Gothic", 20))
+        self.name_titulo.pack(padx=10, pady=30)
+        self.name_titulo.place(relx=0.15, rely=0.35)
+        self.name = customtkinter.CTkLabel(master=self,
+                                           text=name,
+                                           text_color="black",
+                                           font=("Century Gothic", 20))
+        self.name.pack(padx=10, pady=30)
+        self.name.place(relx=0.375, rely=0.35)
+        self.surname_titulo = customtkinter.CTkLabel(master=self,
+                                                     text="Apellido:",
+                                                     text_color="black",
+                                                     font=("Century Gothic", 20))
+        self.surname_titulo.pack(padx=10, pady=30)
+        self.surname_titulo.place(relx=0.15, rely=0.425)
+        self.surname = customtkinter.CTkLabel(master=self,
+                                              text=surname,
+                                              text_color="black",
+                                              font=("Century Gothic", 20))
+        self.surname.pack(padx=10, pady=30)
+        self.surname.place(relx=0.385, rely=0.425)
+        self.money_titulo = customtkinter.CTkLabel(master=self,
+                                                   text="Dinero:",
+                                                   text_color="black",
+                                                   font=("Century Gothic", 20))
+        self.money_titulo.pack(padx=10, pady=30)
+        self.money_titulo.place(relx=0.15, rely=0.5)
+        self.money = customtkinter.CTkLabel(master=self,
+                                            text=str(money) + " €",
+                                            text_color="black",
+                                            font=("Century Gothic", 20))
+        self.money.pack(padx=10, pady=30)
+        self.money.place(relx=0.35, rely=0.5)
+        self.volver = customtkinter.CTkButton(master=self, text="Volver atrás", font=("Roboto", 25),
+                                              width=200, height=50,
+                                              command=lambda: controller.show_frame("Main_frame"))
+        self.volver.pack(padx=10, pady=30)
+        self.volver.place(relx=0.26, rely=0.65)
+
+
+def register_user_gui(controller, user, pwd, name, surname1, email, money):
     if not db_management.search_user(user):
-        db_management.insert_new_user(user, pwd)
-        db_management.insert_new_user_details(user, money, email, name, surname1, surname2)
-        controller.show_frame("Login_frame")
+        syntax = user_auth.check_username_syntax(user) and user_auth.check_pwd_syntax(pwd) and \
+                 user_auth.check_names_syntax(name) and user_auth.check_names_syntax(surname1) and \
+                 user_auth.check_email_syntax(email) and user_auth.check_money(money)
+        if syntax:
+            db_management.insert_new_user(user, pwd)
+            db_management.insert_new_user_details(user, money, email, name, surname1)
+            controller.show_frame("Login_frame")
+        else:
+            controller.show_frame("Register_frame_wrong")
     else:
         controller.show_frame("Register_frame_ar")
 
@@ -262,9 +364,8 @@ def borrar_usuario(controller):
     controller.destroy()
 
 
-def modificar_dinero(controller,cantidad,operation_type):
+def modificar_dinero(controller, cantidad, operation_type):
     global current_user
-    db_management.modify_money(current_user,cantidad,operation_type)
+    db_management.modify_money(current_user, cantidad, operation_type)
     # Buscar al usuario en user_info usando el current_user y actualizar su dinero restandole cantidad
     controller.show_frame("Main_frame")
-

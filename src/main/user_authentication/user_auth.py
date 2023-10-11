@@ -11,9 +11,9 @@ def check_username_syntax(username: str):
     my_regex = re.compile(validation_pattern)
     result = my_regex.fullmatch(username)
     if not result:
-        print("Wrong pattern")
-    else:
-        print("OK")
+        print(username)
+        return False
+    return True
 
 
 def check_pwd_syntax(pwd: str):
@@ -21,8 +21,36 @@ def check_pwd_syntax(pwd: str):
     my_regex = re.compile(validation_pattern)
     result = my_regex.fullmatch(pwd)
     if not result:
-        print("Wrong pattern")
-    else:
-        print("OK.")
+        print(pwd)
+        return False
+    return True
 
 
+def check_names_syntax(name: str):
+    validation_pattern = r"^[A-Z][a-zA-Z]{0,19}$"
+    my_regex = re.compile(validation_pattern)
+    result = my_regex.fullmatch(name)
+    if not result:
+        print(name)
+        return False
+    return True
+
+
+def check_email_syntax(email: str):
+    validation_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    my_regex = re.compile(validation_pattern)
+    result = my_regex.fullmatch(email)
+    if not result:
+        print(email)
+        return False
+    return True
+
+
+def check_money(money: str):
+    if not money.isdigit():
+        print(money)
+        return False
+    if len(money) > 7:
+        print(money)
+        return False
+    return True

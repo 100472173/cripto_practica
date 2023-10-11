@@ -43,15 +43,15 @@ def insert_new_user(username, pwd):
     cursor = conn.cursor()
     token, salt = generate_token(pwd)
     sql_query = f"INSERT INTO usuarios(nickname,pwd_token,salt) values (?,?,?);"
-    valores_insert = [username,token,salt]
-    cursor.execute(sql_query,valores_insert)
+    valores_insert = [username, token, salt]
+    cursor.execute(sql_query, valores_insert)
     commit_changes()
 
 
-def insert_new_user_details(username: str, money: float, email: str, name: str, surname1: str, surname2: str)->None:
+def insert_new_user_details(username: str, money: float, email: str, name: str, surname1: str) -> None:
     cursor = conn.cursor()
-    sql_query = f"INSERT INTO user_info(user, money, email, name, surname1, surname2) values ('{username}','{money}', " \
-                f"'{email}','{name}','{surname1}','{surname2}');"
+    sql_query = f"INSERT INTO user_info(user, money, email, name, surname1) values ('{username}','{money}', " \
+                f"'{email}','{name}','{surname1}');"
     cursor.execute(sql_query)
     commit_changes()
 
@@ -94,7 +94,7 @@ def query():
     print(info)
 
 
-def modify_money(username, new_money,operation_type):
+def modify_money(username, new_money, operation_type):
     cursor = conn.cursor()
     sql_query = f"SELECT money from user_info where user = '{username}';"
     cursor.execute(sql_query)
@@ -102,8 +102,20 @@ def modify_money(username, new_money,operation_type):
     current_money = info[0][0]
     if operation_type == "ingreso":
         money = current_money + int(new_money)
+        if money > 9999999:
+            money = 9999999
     elif operation_type == "retirada":
         money = current_money - int(new_money)
+        if money < 0:
+            money = 0
     sql_statement = f"UPDATE user_info SET money = {money} WHERE user = '{username}';"
     cursor.execute(sql_statement)
     commit_changes()
+
+
+def get_user_info(username):
+    cursor = conn.cursor()
+    sql_query = f"SELECT money, email, name, surname1 from user_info where user = '{username}';"
+    cursor.execute(sql_query)
+    info = cursor.fetchall()
+    return info[0][0], info[0][1], info[0][2], info[0][3]
