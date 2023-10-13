@@ -8,7 +8,7 @@ def create():
     cursor.execute("""CREATE TABLE IF NOT EXISTS usuarios (
                         NICKNAME VARCHAR(21) NOT NULL,
                         PWD_TOKEN VARCHAR(100) NOT NULL,
-                        SALT VARCHAR(100) NOT NULL,	
+                        SALT VARCHAR(100) NOT NULL,
                         PRIMARY KEY(NICKNAME)
                     );""")
     cursor.execute("""CREATE TABLE IF NOT EXISTS user_info (
@@ -17,6 +17,10 @@ def create():
                         EMAIL VARCHAR(50),
                         NAME VARCHAR(30),
                         SURNAME1 VARCHAR(50),
+                        KEY_USED VARCHAR(100) NOT NULL,
+                        NONCE VARCHAR(100) NOT NULL,	
                         PRIMARY KEY(USER),
                         FOREIGN KEY(USER) references USUARIOS(NICKNAME) ON DELETE CASCADE
                     );""")
+
+
