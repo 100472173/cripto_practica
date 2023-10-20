@@ -27,7 +27,7 @@ def check_pwd_syntax(pwd: str):
 
 
 def check_names_syntax(name: str):
-    validation_pattern = r"^[A-Z][a-zA-Z]{0,19}$"
+    validation_pattern = r"^[A-Za-z\s]{1,20}$"
     my_regex = re.compile(validation_pattern)
     result = my_regex.fullmatch(name)
     if not result:
@@ -48,9 +48,7 @@ def check_email_syntax(email: str):
 
 def check_money(money: str):
     if not money.isdigit():
-        print(money)
         return False
     if len(money) > 7:
-        print(money)
         return False
     return True
