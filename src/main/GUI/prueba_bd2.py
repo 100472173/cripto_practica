@@ -6,7 +6,7 @@ cursor = conn.cursor()
 
 
 
-sql_query = f"SELECT * from user_data;"
+sql_query = f"SELECT * from usuarios;"
 cursor.execute(sql_query)
 info = cursor.fetchall()
 print(info)
