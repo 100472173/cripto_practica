@@ -127,6 +127,7 @@ def search_user(username: str) -> bool:
 def delete_user(username: str):
     """Funcion para borrar a un usuario si existe en la BBDD"""
     cursor = conn.cursor()
+    # Para depuracion, aunque el usuario exista al iniciar sesion
     if search_user(username):
         sql_statement1 = f"DELETE FROM user_data WHERE user = '{username}';"
         cursor.execute(sql_statement1)
@@ -135,8 +136,6 @@ def delete_user(username: str):
         sql_statement3 = f"DELETE FROM usuarios WHERE nickname = '{username}';"
         cursor.execute(sql_statement3)
         commit_changes()
-    else:
-        print("Usuario no esta registrado en la base de datos")
 
 
 def obtain_encrypted_money(username):
