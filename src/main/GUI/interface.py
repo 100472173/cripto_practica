@@ -55,7 +55,7 @@ class Login_frame(customtkinter.CTkFrame):
                                               width=190, height=37)
         self.usuario.pack(padx=10, pady=30)
         self.usuario.place(relx=0.275, rely=0.25)
-        self.pwd = customtkinter.CTkEntry(master=self, placeholder_text="Contraseña", font=("Roboto", 15),
+        self.pwd = customtkinter.CTkEntry(master=self, placeholder_text="Contraseña", show="*", font=("Roboto", 15),
                                           width=190, height=37)
         self.pwd.pack(padx=10, pady=30)
         self.pwd.place(relx=0.275, rely=0.375)
@@ -101,7 +101,7 @@ class Register_frame(customtkinter.CTkFrame):
                                               width=190, height=37)
         self.usuario.pack(padx=10, pady=30)
         self.usuario.place(relx=0.275, rely=0.15)
-        self.pwd = customtkinter.CTkEntry(master=self, placeholder_text="Contraseña",
+        self.pwd = customtkinter.CTkEntry(master=self, placeholder_text="Contraseña",show="*",
                                           font=("Roboto", 15),
                                           width=190, height=37)
         self.pwd.pack(padx=10, pady=30)
