@@ -1,3 +1,8 @@
+"""Por una anomalia dado el alacance de la practica, la clave maestra se almacena en la siguiente clase encapsulada
+   como un atributo privado de acceso al no figurar esta como parametro o variable de entorno
+ """
+
+
 class MasterKey:
     def __init__(self):
         """Cada vez que se instancia la clase, se crea un objeto con un atributo privado que almacena
