@@ -18,6 +18,7 @@ class Interface(customtkinter.CTk):
         self.title("My Balance")
         self.frame = Login_frame(master=self, controller=self)
         self.frame.pack(padx=40, pady=20, fill="both", expand="true")
+        self.resizable(width=False, height=False)
 
     def show_frame(self, page_name):
         """Función que controla el cambio de frame en la interfaz, de manera que la interfaz pueda cambiar
