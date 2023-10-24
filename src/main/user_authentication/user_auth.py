@@ -68,8 +68,10 @@ def check_email_syntax(email: str):
 
 def check_money(money: str):
     """Se verifica que el dinero introducido en el registro responde a una cadena numerica y que no supere los 7 digitos"""
-    if not money.isdigit():
-        return False
-    if len(money) > 7:
+    validation_pattern = r"^[0-9]{1,7}(.[0-9]{2})?$"
+    my_regex = re.compile(validation_pattern)
+    result = my_regex.fullmatch(money)
+    if not result:
+        print(money)
         return False
     return True
