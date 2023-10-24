@@ -1,6 +1,8 @@
 import sqlite3
-
-conn = sqlite3.connect('../database_management/app_database.db')
+import os
+current_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+database = current_directory + r"/database_management/app_database.db"
+conn = sqlite3.connect(database)
 
 
 def create():

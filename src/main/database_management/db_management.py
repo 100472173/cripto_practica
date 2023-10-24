@@ -4,17 +4,17 @@ import os
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-# a mamar
-conn = sqlite3.connect('../database_management/app_database.db')
-
-"""Definir nonce y clave para usar"""
-
+"""Se establece conexion con la base de datos"""
+current_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+database = current_directory + r"/database_management/app_database.db"
+conn = sqlite3.connect(database)
 
 def master_key_encrypt(data):
     """Creamos un objeto clave maestra con su propio nonce cada vez que llamamos a encriptar una clave para el usuario"""
     master_key = key_management.MasterKey()
     master_chacha = ChaCha20Poly1305(master_key.data)
     master_nonce = os.urandom(12)
+    # Se procedera a encriptar y desencriptar todas las claves sin datos adicionales asociades (aad)
     encrypted_key = master_chacha.encrypt(master_nonce, data, None)
     #Se retornan para poder almacenarlos en la BBDD
     return encrypted_key, master_nonce
@@ -32,6 +32,7 @@ def master_key_decrypt(encrypted_data, nonce_data):
 def generate_token(pwd):
     """Se genera el token y el salt para derivar la password"""
     salt = os.urandom(16)
+    # Se usa la funcion de derivacion de clave de Scrypt (disponible desde la version 1.6 de Cryptography)
     kdf = Scrypt(
         salt=salt,
         length=32,
@@ -192,18 +193,18 @@ def set_new_money(current_money, new_money, operation_type):
     """Funcion que establece una nueva cantidad de dinero para el usuario"""
     if operation_type == "ingreso":
         # Hay un limite superior del dinero, y este tiene que estar siempre redondeado a 2 cifras para los centimos
-        money = current_money + round(float(new_money),2)
+        money = current_money + float(new_money)
         if money > 9999999:
             money = 9999999
     elif operation_type == "retirada":
         # Hay un limite inferior del dinero, y este tiene que estar siempre redondeado a 2 cifras para los centimos
-        money = current_money - round(float(new_money),2)
+        money = current_money - float(new_money)
         if money < 0:
             money = 0
     else:
         # Para depuracion (no usado, se establece el dinero a 0)
         money = 0
-    return money
+    return round(money,2)
 
 
 def encrypt_money(username, money):
