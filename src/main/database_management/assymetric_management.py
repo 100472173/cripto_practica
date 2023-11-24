@@ -1,51 +1,56 @@
 from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes, padding
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 import os
-import json
 
 
-def load_data():
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    ruta_absoluta = os.path.join(directorio_actual, '..', 'user_files', "files.json")
+def generate_key(user):
+    """Funcion encargada de generar una clave publica para un usuario"""
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+    # Se guarda la la clave en un fichero especifico al usuario (ya se vera que antes se ha de serializar)
+    save_to_file(user, private_key)
+
+
+def serialize(private_key):
+    """Funcion que serializa una clave privada para poder guardarla en un fichero de salida asociado al usuario"""
+    pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.BestAvailableEncryption(b'yeah_ivan')
+    )
+    return pem
+
+
+def save_to_file(username, private_key):
+    """Funcion encargada de guardar en un fichero asociado al usuario su clave privada serializada"""
     try:
-        with open(ruta_absoluta, 'r') as archivo:
-            datos = json.load(archivo)
-        return datos
-    except FileNotFoundError:
-        return {}
-
-def save_data(data):
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    ruta_absoluta = os.path.join(directorio_actual, '..', 'user_files', "files.json")
-    with open(ruta_absoluta, 'w') as archivo:
-        json.dump(data, archivo, indent=2)
-
-def read_file(username):
-    try:
-        datos = load_data()
-        if username in datos:
-            key = datos[username]
-            print(f"La clave para el usuario '{username}' es: {key}")
-            return key
-        else:
-            print(f"No se encontró el usuario '{username}' en el archivo.")
-            return None
+        # Se crea un fichero de tipo username_key.pem
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        ruta_absoluta = os.path.join(directorio_actual, '..', 'user_files')
+        file_path = os.path.join(ruta_absoluta, f"{username}_key.pem")
+        # Se serializa la clave privada
+        pem = serialize(private_key)
+        # Escritura en el archivo de la clave serializada
+        with open(file_path, 'wb') as file:
+            file.write(pem)
+        print(f"Se ha guardado la clave para el usuario '{username}' en el archivo: {file_path}")
+    # Captura de cualquier excepcion mediante depuracion por terminal
     except Exception as e:
-        print(f"Error al leer el archivo: {e}")
-        return None
+        print(f"Error al guardar en el archivo: {e}")
 
-def write_file(username, new_key):
-    try:
-        datos = load_data()
-        # Actualizar la clave para el usuario o agregar un nuevo usuario
-        save_data(datos[username])
-    except Exception as e:
-        print(f"Error al escribir en el archivo: {e}")
 
 def signing(mensaje, user):
+    """Funcion que lleva a cabo el proceso de firma por el mensaje de la accion realizada por el usuario"""
     mensaje_bytes = mensaje.encode('utf-8')
+    # Se lee la clave deserializada
     private_key = read_file(user)
+    # Proceso de firma
     signature = private_key.sign(
         mensaje_bytes,
         padding.PSS(
@@ -54,7 +59,9 @@ def signing(mensaje, user):
         ),
         hashes.SHA256()
     )
+    # Obtencion de la clave publica a partir de la clave privada
     public_key = private_key.public_key()
+    # Se intenta verificar la firma a traves de la clave publica mediante trata de excepciones
     try:
         public_key.verify(
             signature,
@@ -68,11 +75,41 @@ def signing(mensaje, user):
     except InvalidSignature:
         print("No se ha podido verificar la transaccion")
         return None
+    # Se imprime por terminal si ha sido correcta el username con su mensaje
     print("Usuario: " + user + ". " + mensaje)
 
-def generate_key(user):
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
+
+def read_file(username):
+    """Funcion encargada de leer un fichero que alberga una clave privada, y deserializarla"""
+    try:
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(directorio_actual, '..', 'user_files', f"{username}_key.pem")
+
+        if not os.path.exists(file_path):
+            print(f"El archivo para el usuario '{username}' no existe.")
+            return None
+
+        with open(file_path, 'rb') as file:
+            pem_content = file.read()
+        # Si ha ido bien, se deserializa y devuelve el contenido de la clave privada
+        print(f"Se ha leído el contenido del archivo para el usuario '{username}'.")
+        content = deserialize(pem_content)
+        return content
+    # Trata de excepciones
+    except Exception as e:
+        print(f"Error al leer el archivo: {e}")
+        return None
+
+
+def deserialize(data):
+    """Funcion que lleva a cabo la tarea de deserializar una clave 'data' junto a su password asociado"""
+    private_key = serialization.load_pem_private_key(
+        data,
+        password=b'yeah_ivan',
+        backend=default_backend()
     )
-    write_file(user, private_key)
+    return private_key
+
+if __name__ == "__main__":
+    generate_key("Tomas")
+    signing("Hola wachos", "Tomas")
