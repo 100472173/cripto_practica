@@ -35,12 +35,11 @@ def read_file(username):
         print(f"Error al leer el archivo: {e}")
         return None
 
-def write_file(username, new_key: bytes):
+def write_file(username, new_key):
     try:
         datos = load_data()
         # Actualizar la clave para el usuario o agregar un nuevo usuario
-        datos[username] = new_key.decode('utf-8')
-        save_data(datos)
+        save_data(datos[username])
     except Exception as e:
         print(f"Error al escribir en el archivo: {e}")
 
