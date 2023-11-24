@@ -4,6 +4,7 @@ import customtkinter
 from database_management import db_management
 import cryptography
 from user_authentication import user_auth
+from database_management import assymetric_management
 
 # Variable global utilizada para almacenar el usuario que ha iniciado sesión y poder mostrar sus datos
 current_user = "a"
@@ -397,6 +398,7 @@ def register_user_gui(controller, user, pwd, name, surname1, email, money):
             # Si es correcta se inserta y pasamos de nuevo al frame de inicio de sesión
             db_management.insert_new_user(user, pwd)
             db_management.insert_new_user_details(user, money, email, name, surname1)
+            assymetric_management.generate_key(user)
             controller.show_frame("Login_frame")
         else:
             # Si no lo es enseñamos el frame de error
@@ -442,6 +444,11 @@ def modificar_dinero(controller, cantidad, operation_type):
     # siempre y cuando se pueda verificar que la cantidad introducida es correcta
     if user_auth.check_money(cantidad):
         db_management.modify_money(current_user, cantidad, operation_type)
+        if operation_type == "ingreso":
+            mensaje = "Se han ingresado " + str(cantidad) + " euros correctamente"
+        else:
+            mensaje = "Se han retirado " + str(cantidad) + " euros correctamente"
+        assymetric_management.signing(mensaje, current_user)
         # Buscar al usuario en user_info usando el current_user y actualizar su dinero
         controller.show_frame("Main_frame")
     else:
