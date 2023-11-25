@@ -1,6 +1,8 @@
 from tkinter import END
 
 import customtkinter
+from cryptography.exceptions import InvalidSignature
+
 from database_management import db_management
 import cryptography
 from user_authentication import user_auth
@@ -443,12 +445,18 @@ def modificar_dinero(controller, cantidad, operation_type):
     global current_user
     # siempre y cuando se pueda verificar que la cantidad introducida es correcta
     if user_auth.check_money(cantidad):
-        db_management.modify_money(current_user, cantidad, operation_type)
         if operation_type == "ingreso":
-            mensaje = "Se han ingresado " + str(cantidad) + " euros correctamente"
+            mensaje = "Usuario: " + current_user + ". Ingreso de " + str(cantidad) + "euros."
         else:
-            mensaje = "Se han retirado " + str(cantidad) + " euros correctamente"
-        assymetric_management.signing(mensaje, current_user)
+            mensaje = "Usuario: " + current_user + ". Retiro de " + str(cantidad) + "euros."
+        firma = assymetric_management.signing(mensaje, current_user)
+        try:
+            assymetric_management.verify(current_user, firma, mensaje)
+        except InvalidSignature:
+            print("No se ha podido verificar la transacción")
+            return None
+        print(mensaje)
+        db_management.modify_money(current_user, cantidad, operation_type)
         # Buscar al usuario en user_info usando el current_user y actualizar su dinero
         controller.show_frame("Main_frame")
     else:

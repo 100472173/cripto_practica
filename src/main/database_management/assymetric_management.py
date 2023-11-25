@@ -59,8 +59,13 @@ def signing(mensaje, user):
         ),
         hashes.SHA256()
     )
-    # Obtencion de la clave publica a partir de la clave privada
-    public_key = private_key.public_key()
+    return signature
+
+
+def verify(user, signature, mensaje):
+    # Obtencion de la clave publica
+    public_key = read_file(user)
+    mensaje_bytes = mensaje.encode('utf-8')
     # Se intenta verificar la firma a traves de la clave publica mediante trata de excepciones
     try:
         public_key.verify(
@@ -72,12 +77,8 @@ def signing(mensaje, user):
             ),
             hashes.SHA256()
         )
-    except InvalidSignature:
-        print("No se ha podido verificar la transaccion")
-        return None
-    # Se imprime por terminal si ha sido correcta el username con su mensaje
-    print("Usuario: " + user + ". " + mensaje)
-
+    except InvalidSignature as e:
+        raise e
 
 def read_file(username):
     """Funcion encargada de leer un fichero que alberga una clave privada, y deserializarla"""
@@ -109,6 +110,7 @@ def deserialize(data):
         backend=default_backend()
     )
     return private_key
+
 
 if __name__ == "__main__":
     generate_key("Tomas")
