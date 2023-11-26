@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 import os
 
 
@@ -28,17 +29,27 @@ def serialize(private_key):
 
 
 def save_to_file(username, private_key):
+    file_path = return_path("private", username)
     """Funcion encargada de guardar en un fichero asociado al usuario su clave privada serializada"""
     try:
-        # Se crea un fichero de tipo username_key.pem
-        directorio_actual = os.path.dirname(os.path.abspath(__file__))
-        ruta_absoluta = os.path.join(directorio_actual, '..', 'user_files')
-        file_path = os.path.join(ruta_absoluta, f"{username}_key.pem")
         # Se serializa la clave privada
-        pem = serialize(private_key)
+        priv_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.BestAvailableEncryption(b'yeah_ivan')
+        )
         # Escritura en el archivo de la clave serializada
         with open(file_path, 'wb') as file:
-            file.write(pem)
+            file.write(priv_pem)
+        public_key = private_key.public_key()
+        pub_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        file_path = return_path("public", username)
+        # Escritura en el archivo de la clave serializada
+        with open(file_path, 'wb') as file:
+            file.write(pub_pem)
         print(f"Se ha guardado la clave para el usuario '{username}' en el archivo: {file_path}")
     # Captura de cualquier excepcion mediante depuracion por terminal
     except Exception as e:
@@ -49,7 +60,7 @@ def signing(mensaje, user):
     """Funcion que lleva a cabo el proceso de firma por el mensaje de la accion realizada por el usuario"""
     mensaje_bytes = mensaje.encode('utf-8')
     # Se lee la clave deserializada
-    private_key = read_file(user)
+    private_key = read_file(user, "private")
     # Proceso de firma
     signature = private_key.sign(
         mensaje_bytes,
@@ -59,12 +70,13 @@ def signing(mensaje, user):
         ),
         hashes.SHA256()
     )
+    # Obtencion de la clave publica a partir de la clave privada
     return signature
 
 
 def verify(user, signature, mensaje):
     # Obtencion de la clave publica
-    public_key = read_file(user)
+    public_key = read_file(user, "public")
     mensaje_bytes = mensaje.encode('utf-8')
     # Se intenta verificar la firma a traves de la clave publica mediante trata de excepciones
     try:
@@ -80,21 +92,19 @@ def verify(user, signature, mensaje):
     except InvalidSignature as e:
         raise e
 
-def read_file(username):
+
+def read_file(username, privacy_type):
+    file_path = return_path(privacy_type, username)
     """Funcion encargada de leer un fichero que alberga una clave privada, y deserializarla"""
     try:
-        directorio_actual = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(directorio_actual, '..', 'user_files', f"{username}_key.pem")
-
         if not os.path.exists(file_path):
             print(f"El archivo para el usuario '{username}' no existe.")
             return None
-
         with open(file_path, 'rb') as file:
             pem_content = file.read()
         # Si ha ido bien, se deserializa y devuelve el contenido de la clave privada
         print(f"Se ha leído el contenido del archivo para el usuario '{username}'.")
-        content = deserialize(pem_content)
+        content = deserialize(pem_content, privacy_type)
         return content
     # Trata de excepciones
     except Exception as e:
@@ -102,7 +112,24 @@ def read_file(username):
         return None
 
 
-def deserialize(data):
+def return_path(privacy_type, username):
+    if privacy_type == "public":
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        ruta_absoluta = os.path.join(directorio_actual, '..', 'user_public_files')
+        file_path = os.path.join(ruta_absoluta, f"{username}_public_key.pem")
+    elif privacy_type == "private":
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        ruta_absoluta = os.path.join(directorio_actual, '..', 'user_private_files')
+        file_path = os.path.join(ruta_absoluta, f"{username}_private_key.pem")
+    else:
+        return " "
+    return file_path
+
+
+def deserialize(data, privacy_type):
+    if privacy_type == "public":
+        key = load_pem_public_key(data)
+        return key
     """Funcion que lleva a cabo la tarea de deserializar una clave 'data' junto a su password asociado"""
     private_key = serialization.load_pem_private_key(
         data,
@@ -113,5 +140,7 @@ def deserialize(data):
 
 
 if __name__ == "__main__":
+    generate_key("Lex")
+    signing("Hey muy buenas a todos", "Lex")
     generate_key("Tomas")
     signing("Hola wachos", "Tomas")
