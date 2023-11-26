@@ -447,9 +447,9 @@ def modificar_dinero(controller, cantidad, operation_type):
     # siempre y cuando se pueda verificar que la cantidad introducida es correcta
     if user_auth.check_money(cantidad):
         if operation_type == "ingreso":
-            mensaje = "Usuario: " + current_user + ". Ingreso de " + str(cantidad) + "euros."
+            mensaje = "Usuario: " + current_user + ". Ingreso de " + str(cantidad) + " euros."
         else:
-            mensaje = "Usuario: " + current_user + ". Retiro de " + str(cantidad) + "euros."
+            mensaje = "Usuario: " + current_user + ". Retiro de " + str(cantidad) + " euros."
         firma = assymetric_management.signing(mensaje, current_user)
         try:
             assymetric_management.verify(current_user, firma, mensaje)
