@@ -400,7 +400,8 @@ def register_user_gui(controller, user, pwd, name, surname1, email, money):
             # Si es correcta se inserta y pasamos de nuevo al frame de inicio de sesión
             db_management.insert_new_user(user, pwd)
             db_management.insert_new_user_details(user, money, email, name, surname1)
-            assymetric_management.generate_key(user)
+            key = assymetric_management.generate_key(user)
+            assymetric_management.certificate_request(user, key)
             controller.show_frame("Login_frame")
         else:
             # Si no lo es enseñamos el frame de error

@@ -4,6 +4,9 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+
 import os
 
 
@@ -15,6 +18,29 @@ def generate_key(user):
     )
     # Se guarda la la clave en un fichero especifico al usuario (ya se vera que antes se ha de serializar)
     save_to_file(user, private_key)
+    return private_key
+
+
+def certificate_request(user, key):
+    csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
+        # Provide various details about who we are.
+        x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "California"),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
+        x509.NameAttribute(NameOID.COMMON_NAME, "mysite.com"),
+    ])).add_extension(
+        x509.SubjectAlternativeName([
+            # Describe what sites we want this certificate for.
+            x509.DNSName("mysite.com"),
+            x509.DNSName("www.mysite.com"),
+            x509.DNSName("subdomain.mysite.com"),
+        ]),
+        critical=False,
+        # Sign the CSR with our private key.
+    ).sign(key, hashes.SHA256())
+    with open("path/to/csr.pem", "wb") as f:
+        f.write(csr.public_bytes(serialization.Encoding.PEM))
 
 
 def serialize(private_key):
@@ -79,6 +105,7 @@ def verify(user, signature, mensaje):
         )
     except InvalidSignature as e:
         raise e
+
 
 def read_file(username):
     """Funcion encargada de leer un fichero que alberga una clave privada, y deserializarla"""
