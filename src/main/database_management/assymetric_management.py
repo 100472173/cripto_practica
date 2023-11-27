@@ -89,6 +89,21 @@ def send_request_AC2(user):
     subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
 
 
+def verify_certificate(user):
+    public_key = read_file(user, "public")
+    certificado = ...
+    try:
+        public_key.verify(
+            certificado.signature,
+            certificado.tbs_certificate_bytes,
+            # Depends on the algorithm used to create the certificate
+            padding.PKCS1v15(),
+            certificado.signature_hash_algorithm,
+        )
+    except InvalidSignature as e:
+        raise e
+
+
 def serialize(private_key):
     """Funcion que serializa una clave privada para poder guardarla en un fichero de salida asociado al usuario"""
     pem = private_key.private_bytes(
