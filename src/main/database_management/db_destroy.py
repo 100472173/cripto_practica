@@ -16,5 +16,5 @@ def destroy():
     cursor.execute(f"DROP TABLE USUARIOS;")
 
 # Descomentar en caso de que se quiera destruir la base de datos
-# destroy()
+destroy()
 

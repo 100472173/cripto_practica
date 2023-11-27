@@ -1,3 +1,6 @@
+import shutil
+import subprocess
+
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -23,25 +26,67 @@ def generate_key(user):
 
 
 def certificate_request(user, key):
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    ruta_absoluta = os.path.join(directorio_actual, '..', 'A')
+    file_path = os.path.join(ruta_absoluta, f"{user}_request.pem")
     csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
         # Provide various details about who we are.
         x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
         x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "California"),
         x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, "My Company"),
-        x509.NameAttribute(NameOID.COMMON_NAME, "mysite.com"),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, f"{user}-company"),
+        x509.NameAttribute(NameOID.COMMON_NAME, f"{user}mysite.com"),
     ])).add_extension(
         x509.SubjectAlternativeName([
             # Describe what sites we want this certificate for.
-            x509.DNSName("mysite.com"),
+            x509.DNSName(f"{user}.mysite.com"),
             x509.DNSName("www.mysite.com"),
             x509.DNSName("subdomain.mysite.com"),
         ]),
         critical=False,
         # Sign the CSR with our private key.
     ).sign(key, hashes.SHA256())
-    with open("path/to/csr.pem", "wb") as f:
+    with open(file_path, "wb") as f:
         f.write(csr.public_bytes(serialization.Encoding.PEM))
+    send_request_AC2(user)
+    certificate(user)
+
+
+def certificate(user):
+    # Cambiar al directorio AC2 antes de ejecutar openssl ca
+    directorio_actual = os.getcwd()
+    print(dir)
+    os.chdir("../AC2")
+
+    # Comando para ejecutar openssl ca
+    password = "elbicho7"
+    confirmacion = "y"
+    confirmacion_2 = "y"
+    comando_ca = f"openssl ca -in solicitudes/{user}_request.pem -notext -config AC2-72198.cnf"
+
+    # Utilizar input para proporcionar las respuestas a las solicitudes interactivas
+    entrada_interactiva = f"{password}\n{confirmacion}\n{confirmacion_2}\n"
+    entrada_interactiva_bytes = entrada_interactiva.encode('utf-8')  # Codificar a bytes
+
+    subprocess.run(comando_ca, input=entrada_interactiva_bytes, shell=True)
+
+    # Restaurar el directorio de trabajo a su estado original
+
+    lista_archivos = os.listdir("nuevoscerts")
+    if lista_archivos:
+        # Mover el primer (o único) archivo al directorio de certificados de usuario
+        archivo_a_mover = lista_archivos[0]
+        shutil.move(f"nuevoscerts/{archivo_a_mover}", f"../A/user_certificados/certificate_{user}.pem")
+        print("Se movió el archivo correctamente.")
+    else:
+        print("No se encontraron archivos en nuevoscerts.")
+    os.chdir(directorio_actual)
+
+
+def send_request_AC2(user):
+    print(user)
+    comando = f"cp ../A/{user}_request.pem ../AC2/solicitudes"
+    subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
 
 
 def serialize(private_key):
@@ -166,7 +211,7 @@ def deserialize(data, privacy_type):
 
 
 if __name__ == "__main__":
-    generate_key("Lex")
-    signing("Hey muy buenas a todos", "Lex")
-    generate_key("Tomas")
-    signing("Hola wachos", "Tomas")
+    user = "ili33"
+    generate_key(user)
+    key = read_file(user, "private")
+    certificate_request(user, key)
