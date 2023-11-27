@@ -212,6 +212,16 @@ def return_path(privacy_type, username):
     return file_path
 
 
+def return_deserialized_cert(username):
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    ruta_absoluta = os.path.join(directorio_actual, '..', 'A', 'user_certificados')
+    file_path = os.path.join(ruta_absoluta, f"certificate_{username}.pem")
+    with open(file_path, 'rb') as file:
+        pem_content = file.read()
+    cert = x509.load_pem_x509_certificate(pem_content)
+    return cert
+
+
 def deserialize(data, privacy_type):
     if privacy_type == "public":
         key = load_pem_public_key(data)
