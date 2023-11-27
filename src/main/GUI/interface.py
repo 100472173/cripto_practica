@@ -419,6 +419,11 @@ def login_user_gui(controller, user, pwd):
             # Verificamos que la contraseña introducida es la misma que la que se usó en el registro
             # usando para ello la derivación de la contraseña
             db_management.verify_user_password(user, pwd)
+            try:
+                assymetric_management.verify_certificate(user)
+            except InvalidSignature:
+                print("No se ha podido verificar el certificado de usuario")
+                return None
             # Marcamos el usuario como el usuario actual
             global current_user
             current_user = user
