@@ -12,20 +12,20 @@ conn = sqlite3.connect(database)
 def master_key_encrypt(data):
     """Creamos un objeto clave maestra con su propio nonce cada vez que llamamos a encriptar una clave para el usuario"""
     master_key = key_management.MasterKey()
-    master_chacha = ChaCha20Poly1305(master_key.data)
+    master_chacha = ChaCha20Poly1305(bytes.fromhex(os.environ["MASTER_KEY"]))
     master_nonce = os.urandom(12)
     # Se procedera a encriptar y desencriptar todas las claves sin datos adicionales asociades (aad)
     encrypted_key = master_chacha.encrypt(master_nonce, data, None)
-    #Se retornan para poder almacenarlos en la BBDD
+    # Se retornan para poder almacenarlos en la BBDD
     return encrypted_key, master_nonce
 
 
 def master_key_decrypt(encrypted_data, nonce_data):
     """Realizamos el proceso inverso al anterior cada vez que llamamos a desencriptar una clave para el usuario"""
     master_key = key_management.MasterKey()
-    master_chacha = ChaCha20Poly1305(master_key.data)
+    master_chacha = ChaCha20Poly1305(bytes.fromhex(os.environ["MASTER_KEY"]))
     decrypted_key = master_chacha.decrypt(nonce_data, encrypted_data, None)
-    #Se retorna la clave desencriptada para poder descifrar los demas datos del usuario
+    # Se retorna la clave desencriptada para poder descifrar los demas datos del usuario
     return decrypted_key
 
 

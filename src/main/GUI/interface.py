@@ -457,7 +457,7 @@ def modificar_dinero(controller, cantidad, operation_type):
             mensaje = "Usuario: " + current_user + ". Retiro de " + str(cantidad) + " euros."
         firma = assymetric_management.signing(mensaje, current_user)
         try:
-            assymetric_management.verify(current_user, firma, mensaje)
+            assymetric_management.verify_signature(current_user, firma, mensaje)
         except InvalidSignature:
             print("No se ha podido verificar la transacción")
             return None
