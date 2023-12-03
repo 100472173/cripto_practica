@@ -427,6 +427,7 @@ def login_user_gui(controller, user, pwd):
             # Marcamos el usuario como el usuario actual
             global current_user
             current_user = user
+            print("Certificado de usuario verificado. Acceso concedido")
             controller.show_frame("Main_frame")
         # Si no se puede verificar que la contraseña es la misma, se captura la excepción lanzada por Cryptography
         # y se muestra el frame de error

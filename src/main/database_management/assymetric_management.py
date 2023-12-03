@@ -214,15 +214,25 @@ def certificate(user):
 
 def verify_certificate(user):
     """FUncion que verifica la firma del certificado de usuario"""
-    verify_files(user)     # Se llama a la verificacion de los ficheros de certificado
+    cert_user, cert_ac2, cert_ac1 = return_deserialized_cert(user)
+    cert_ac2.public_key().verify(
+        cert_user.signature,
+        cert_user.tbs_certificate_bytes,
+        cert_user.signature_algorithm_parameters,
+        cert_user.signature_hash_algorithm,
+    )
+    cert_ac1.public_key().verify(
+        cert_ac2.signature,
+        cert_ac2.tbs_certificate_bytes,
+        cert_ac2.signature_algorithm_parameters,
+        cert_ac2.signature_hash_algorithm,
+    )
 
-
-def verify_files(user):
-    """Funcion que verifica el certificado asociado al usuario con los de AC2 (que usa su clave publica) que a su vez
+"""def verify_files(user):
+    Funcion que verifica el certificado asociado al usuario con los de AC2 (que usa su clave publica) que a su vez
        usa la clave publica de AC1 para verificarse
-    """
     comando = f"openssl verify -CAfile ../A/certs.pem ../A/user_certificados/certificate_{user}.pem"
-    subprocess.run(comando, shell=True)
+    subprocess.run(comando, shell=True)"""
 
 
 def return_deserialized_cert(username):
@@ -234,7 +244,21 @@ def return_deserialized_cert(username):
         pem_content = file.read()
     # Funcion load content para poder deserializarlo lo procesado del fichero del usuario
     cert = x509.load_pem_x509_certificate(pem_content)
-    return cert
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    ruta_absoluta = os.path.join(directorio_actual, '..', 'AC2')
+    file_path = os.path.join(ruta_absoluta, f"ac2cert.pem")
+    with open(file_path, 'rb') as file:
+        pem_content = file.read()
+    # Funcion load content para poder deserializarlo lo procesado del fichero del usuario
+    cert2 = x509.load_pem_x509_certificate(pem_content)
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    ruta_absoluta = os.path.join(directorio_actual, '..', 'AC1')
+    file_path = os.path.join(ruta_absoluta, f"ac1cert.pem")
+    with open(file_path, 'rb') as file:
+        pem_content = file.read()
+    # Funcion load content para poder deserializarlo lo procesado del fichero del usuario
+    cert3 = x509.load_pem_x509_certificate(pem_content)
+    return cert, cert2, cert3
 
 
 if __name__ == "__main__":
