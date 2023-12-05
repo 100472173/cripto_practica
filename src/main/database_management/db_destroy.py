@@ -17,7 +17,7 @@ def destroy():
     cursor.execute(f"DROP TABLE USUARIOS;")
 
 # (Adicional, para destruir la bbdd hay que eliminar los certificados y claves de usuario...)
-# config_cert.resetear_directorios()
+config_files.resetear_directorios()
 # Descomentar en caso de que se quiera destruir la base de datos
-# destroy()
+destroy()
 
