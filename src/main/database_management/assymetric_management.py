@@ -13,6 +13,11 @@ from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 import os
 
+"""Definimos en varaibles de entorno las pwd utilizadas donde corresponda: al serializar y al interactuar con openSSL
+ Notese que normalmente deberian cargarse de un archivo de configuracion, pero por el contexto de la practica, se mantiene asi
+ """
+os.environ["pwd_key"] = b'2023_pwd_p2'.hex()
+os.environ["openssl_pwd"] = "elbicho7"
 
 def generate_key(user):
     """Funcion encargada de generar una clave publica para un usuario"""
@@ -30,7 +35,7 @@ def serialize(private_key):
     pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.BestAvailableEncryption(b'yeah_ivan')
+        encryption_algorithm=serialization.BestAvailableEncryption(bytes.fromhex(os.environ["pwd_key"]))
     )
     return pem
 
@@ -60,7 +65,7 @@ def save_to_file(username, private_key):
         priv_pem = private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.BestAvailableEncryption(b'yeah_ivan')
+            encryption_algorithm=serialization.BestAvailableEncryption(bytes.fromhex(os.environ["pwd_key"]))
         )
         # Escritura en el archivo de la clave serializada
         with open(file_path, 'wb') as file:
@@ -87,7 +92,7 @@ def deserialize(data, privacy_type):
         return key
     private_key = serialization.load_pem_private_key(
         data,
-        password=b'yeah_ivan',
+        password=bytes.fromhex(os.environ["pwd_key"]),
         backend=default_backend()
     )
     return private_key
@@ -133,7 +138,9 @@ def signing(mensaje, user):
 def verify_signature(user, signature, mensaje):
     """Funcion que verifica la firma de un usuario cuando realiza una determinada transaccion"""
     # Obtencion de la clave publica
-    public_key = read_file(user, "public")
+    certificado = return_deserialized_cert(user)[0] # Devuelvo el certificado deserializado de usuario
+    # public_key = read_file(user, "public")
+    public_key = certificado.public_key()
     mensaje_bytes = mensaje.encode('utf-8')
     # Se intenta verificar la firma a traves de la clave publica mediante trata de excepciones
     try:
@@ -194,7 +201,7 @@ def certificate(user):
     directorio_actual = os.getcwd()
     os.chdir("../AC2")
     # Comando para ejecutar openssl ca para procesar la solicitud
-    password = "elbicho7"
+    password = os.environ["openssl_pwd"]
     confirmacion = "y"
     confirmacion_2 = "y"
     comando_ca = f"openssl ca -in solicitudes/{user}_request.pem -notext -config AC2-72198.cnf"
@@ -213,14 +220,17 @@ def certificate(user):
 
 
 def verify_certificate(user):
-    """FUncion que verifica la firma del certificado de usuario"""
-    cert_user, cert_ac2, cert_ac1 = return_deserialized_cert(user)
+    """ Funcion que verifica la firma del certificado de usuario"""
+    cert_user, cert_ac2, cert_ac1 = return_deserialized_cert(user) # Certificados deserializados
+
+    # Se verifica con la clave de 'AC2' a  'A'
     cert_ac2.public_key().verify(
         cert_user.signature,
         cert_user.tbs_certificate_bytes,
         cert_user.signature_algorithm_parameters,
         cert_user.signature_hash_algorithm,
     )
+    # Se verifica con la clave de 'AC1' a 'AC2'. Como se nota, 'AC1' no tiene necesidad de verificarse
     cert_ac1.public_key().verify(
         cert_ac2.signature,
         cert_ac2.tbs_certificate_bytes,
@@ -229,8 +239,8 @@ def verify_certificate(user):
     )
 
 """def verify_files(user):
-    Funcion que verifica el certificado asociado al usuario con los de AC2 (que usa su clave publica) que a su vez
-       usa la clave publica de AC1 para verificarse
+    #Funcion alternativa que verifica el certificado asociado al usuario con los de AC2 (que usa su clave publica) que a su vez
+       #usa la clave publica de AC1 para verificarse
     comando = f"openssl verify -CAfile ../A/certs.pem ../A/user_certificados/certificate_{user}.pem"
     subprocess.run(comando, shell=True)"""
 
@@ -262,7 +272,7 @@ def return_deserialized_cert(username):
 
 
 if __name__ == "__main__":
-    user = "ili33"
+    user = "ili13"
     generate_key(user)
     key = read_file(user, "private")
     certificate_request(user, key)
