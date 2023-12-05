@@ -200,6 +200,9 @@ def certificate(user):
     # Cambiar al directorio AC2 antes de ejecutar los mandatos de openssl
     directorio_actual = os.getcwd()
     os.chdir("../AC2")
+    directorio_nuevoscerts = "nuevoscerts"
+    if not os.path.exists(directorio_nuevoscerts):
+        os.makedirs(directorio_nuevoscerts)
     # Comando para ejecutar openssl ca para procesar la solicitud
     password = os.environ["openssl_pwd"]
     confirmacion = "y"
